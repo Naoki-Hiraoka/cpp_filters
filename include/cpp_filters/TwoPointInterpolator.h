@@ -32,7 +32,7 @@ namespace filters {
       T a;
       get(x, v, a, dt);
     }
-    void get(double *x, double *v, double *a, double dt=0.0) {
+    void get(T& x, T& v, T& a, double dt=0.0) {
       current_time_ += dt;
       if (current_time_ < 0.0) current_time_ = 0.0;
       if (current_time_ > goal_time_) current_time_ = goal_time_;
@@ -52,18 +52,18 @@ namespace filters {
     {
       goal_time_ = 0.0;
       current_time_ = 0.0;
-      a0_ = init_x;
-      a1_ = init_v;
-      a2_ = init_a/2;
-      a3_ = init_x*0;
-      a4_ = init_x*0;
-      a5_ = init_x*0;
+      a0_ = x;
+      a1_ = v;
+      a2_ = a/2;
+      a3_ = x*0;
+      a4_ = x*0;
+      a5_ = x*0;
     }
     // Stop to current value
     void clear() {
       T x, v, a;
       this->get(x,v,a,0.0);
-      this->reset(x,v,a);
+      this->reset(x,v*0,a*0);
     }
     bool isEmpty() {
       return current_time_ == goal_time_;
