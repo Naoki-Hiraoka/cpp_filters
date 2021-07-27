@@ -1,9 +1,7 @@
 #ifndef __CPP_FILTERS_INTERPOLATOR_H__
 #define __CPP_FILTERS_INTERPOLATOR_H__
 
-#include <deque>
 #include <string>
-#include <coil/Mutex.h>
 
 namespace filters {
   template<typename T> class TwoPointInterpolator
