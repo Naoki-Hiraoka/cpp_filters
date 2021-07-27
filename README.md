@@ -7,3 +7,7 @@ modified from https://github.com/fkanehiro/hrpsys-base/blob/master/rtc/TorqueFil
 ## IIRFilter
 
 modified from https://github.com/ishiguroJSK/hrpsys-base/blob/wbms-dev/rtc/TorqueFilter/IIRFilter.h
+
+## TwoPointInterpolator
+
+modified from https://github.com/fkanehiro/hrpsys-base/blob/master/rtc/SequencePlayer/interpolator.h
