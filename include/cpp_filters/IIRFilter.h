@@ -2,6 +2,11 @@
 #define __CPP_FILTERS_IIR_FILTER_H__
 
 #include <cmath>
+#include <string>
+#include <vector>
+#include <deque>
+#include <iostream>
+#include <numeric>
 
 namespace filters{
   /**
@@ -60,7 +65,7 @@ namespace filters{
       }
 
       // init previous values
-      this->reset(init_value);
+      this->reset(initial_input);
       m_initialized = true;
       return true;
     }
@@ -71,7 +76,7 @@ namespace filters{
        \param Q quality factor: 1/2 = no overshoot, 1/sqrt(2) = Butterworth
        \param hz sampling rate
     */
-    bool setParameterAsBiquad(const double f_cutoff, const double Q, const double hz) {
+    bool setParameterAsBiquad(const double f_cutoff, const double Q, const double hz, const T& initial_input) {
       std::vector<double> fb_coeffs(3), ff_coeffs(3);
       const double omega = 2 * 3.14159265 * f_cutoff / hz;
       const double alpha = std::sin(omega) / (2 * Q);
@@ -82,7 +87,7 @@ namespace filters{
       ff_coeffs[0] = (1 - std::cos(omega)) / 2 / denom;
       ff_coeffs[1] = (1 - std::cos(omega)) / denom;
       ff_coeffs[2] = (1 - std::cos(omega)) / 2 / denom;
-      return this->setParameter(2, fb_coeffs, ff_coeffs);
+      return this->setParameter(2, fb_coeffs, ff_coeffs, initial_input);
     }
 
     /**

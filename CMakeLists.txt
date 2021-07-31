@@ -188,6 +188,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
+add_subdirectory(sample)
+
 #############
 ## Testing ##
 #############
