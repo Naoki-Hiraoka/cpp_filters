@@ -2,7 +2,7 @@
 #define __CPP_FILTERS_FIRSTORDER_LOWPASS_FILTER_H__
 #include <cmath>
 
-namespace filters{
+namespace  cpp_filters{
   template <class T> class FirstOrderLowPassFilter
   {
   private:

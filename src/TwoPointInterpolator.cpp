@@ -1,6 +1,6 @@
 #include <cpp_filters/TwoPointInterpolator.h>
 
-namespace filters {
+namespace cpp_filters {
   inline Eigen::Matrix3d hat(const Eigen::Vector3d& x) {
     Eigen::Matrix3d M;
     M <<  0.0, -x(2),   x(1),

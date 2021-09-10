@@ -4,7 +4,7 @@
 #include <string>
 #include <Eigen/Eigen>
 
-namespace filters {
+namespace cpp_filters {
   typedef enum {LINEAR, HOFFARBIB,QUINTICSPLINE,CUBICSPLINE} interpolation_mode;
 
   template<typename T1, typename T2> class TwoPointInterpolatorBase

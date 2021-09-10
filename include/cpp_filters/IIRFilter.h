@@ -8,7 +8,7 @@
 #include <iostream>
 #include <numeric>
 
-namespace filters{
+namespace  cpp_filters{
   /**
      Infinite Impulse Filter
      y[n] = sum(0, dim, ff_coeffs[i] * x[n - i]) + sum(1, dim, fb_coeffs[i] * y[n - i])
