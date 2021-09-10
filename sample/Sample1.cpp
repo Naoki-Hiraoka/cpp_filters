@@ -18,7 +18,7 @@ int main(void){
     std::cout << t << "\t" << iirFilter.passFilter(1.0)<<std::endl;
   }
 
-  filters::TwoPointInterpolator<double> twoPointInterpolator(0.0,0.0,0.0,filters::TwoPointInterpolator<double>::LINEAR);
+  filters::TwoPointInterpolator<double> twoPointInterpolator(0.0,0.0,0.0,filters::LINEAR);
   twoPointInterpolator.setGoal(1.0,1.0);
   std::cout << "twoPointInterpolator LINEAR"<<std::endl;
   for(double t=0.1;t<2.0;t+=0.1){
@@ -28,13 +28,38 @@ int main(void){
   }
 
   twoPointInterpolator.reset(0.0);
-  twoPointInterpolator.setInterpolationMode(filters::TwoPointInterpolator<double>::HOFFARBIB);
+  twoPointInterpolator.setInterpolationMode(filters::HOFFARBIB);
   twoPointInterpolator.setGoal(1.0,1.0);
   std::cout << "twoPointInterpolator HOFFARBIB"<<std::endl;
   for(double t=0.1;t<2.0;t+=0.1){
     double x;
     twoPointInterpolator.get(x,0.1);
     std::cout << t << "\t" << x<<std::endl;
+  }
+
+  filters::TwoPointInterpolatorSO3 twoPointInterpolatorSO3(Eigen::Matrix3d::Identity(),Eigen::Vector3d::Zero(),Eigen::Vector3d::Zero(),filters::HOFFARBIB);
+  twoPointInterpolatorSO3.setGoal(Eigen::Matrix3d(Eigen::AngleAxisd(1.7,Eigen::Vector3d::UnitY())),1.0);
+  std::cout << "twoPointInterpolatorSO3 HOFFARBIB"<<std::endl;
+  for(double t=0.1;t<=1.0;t+=0.1){
+    Eigen::Matrix3d x;
+    Eigen::Vector3d v;
+    twoPointInterpolatorSO3.get(x,v,0.1);
+    std::cout << t << std::endl;
+    std::cout << x << std::endl;
+    std::cout << v.transpose() <<std::endl;
+  }
+
+  twoPointInterpolatorSO3.reset(Eigen::Matrix3d::Identity());
+  twoPointInterpolatorSO3.setGoal(Eigen::Matrix3d(Eigen::AngleAxisd(1.5708,Eigen::Vector3d::UnitZ())*Eigen::AngleAxisd(1.7,Eigen::Vector3d::UnitY())),Eigen::Vector3d::UnitY(),Eigen::Vector3d::UnitY(),1.0);
+  std::cout << "twoPointInterpolatorSO3 HOFFARBIB with vel acc"<<std::endl;
+  for(double t=0.1;t<=1.0;t+=0.1){
+    Eigen::Matrix3d x;
+    Eigen::Vector3d v, a;
+    twoPointInterpolatorSO3.get(x,v,a,0.1);
+    std::cout << t << std::endl;
+    std::cout << x << std::endl;
+    std::cout << v.transpose() <<std::endl;
+    std::cout << a.transpose() <<std::endl;
   }
 
 }
