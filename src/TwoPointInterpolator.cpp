@@ -50,6 +50,7 @@ namespace cpp_filters {
   }
   template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::setGoalImpl(const Eigen::Matrix3d& startx, const Eigen::Vector3d& startv, const Eigen::Vector3d& starta, const Eigen::Matrix3d& goalx, const Eigen::Vector3d& goalv, const Eigen::Vector3d& goala, double t) {
+    this->startx_ = startx;
 
     Eigen::Vector3d starttheta = Eigen::Vector3d::Zero();
     Eigen::AngleAxisd angleaxis(startx.transpose()*goalx);

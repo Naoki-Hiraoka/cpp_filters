@@ -183,6 +183,7 @@ namespace cpp_filters {
   }
   template<typename T1, typename T2>
   void TwoPointInterpolatorBase<T1,T2>::setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t) {
+    this->startx_ = startx;
     this->calcCoeff(startx, startv, starta, goalx, goalv, goala, t);
   }
   template<typename T> using TwoPointInterpolator = TwoPointInterpolatorBase<T,T>;
