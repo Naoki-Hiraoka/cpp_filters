@@ -3,6 +3,7 @@
 
 #include <string>
 #include <Eigen/Eigen>
+#include <iostream>
 
 namespace cpp_filters {
   typedef enum {LINEAR, HOFFARBIB,QUINTICSPLINE,CUBICSPLINE} interpolation_mode;
@@ -43,12 +44,10 @@ namespace cpp_filters {
     }
     // Reset current value.
     void reset(const T1& x) {
-      T2 tmp;
-      this->reset(x,tmp*0,tmp*0);
+      this->reset(x,this->a0_*0,this->a0_*0);
     }
     void reset(const T1& x, const T2& v) {
-      T2 tmp;
-      this->reset(x,v,tmp*0);
+      this->reset(x,v,this->a0_*0);
     }
     void reset(const T1& x, const T2& v, const T2& a)
     {
@@ -77,12 +76,10 @@ namespace cpp_filters {
     };
     // Set goal
     void setGoal(const T1& goalx, double t) {
-      T2 tmp;
-      this->setGoal(goalx,tmp*0,tmp*0,t);
+      this->setGoal(goalx,this->a0_*0,this->a0_*0,t);
     }
     void setGoal(const T1& goalx, const T2& goalv, double t) {
-      T2 tmp;
-      this->setGoal(goalx,goalv,tmp*0,t);
+      this->setGoal(goalx,goalv,this->a0_*0,t);
     }
     void setGoal(const T1& goalx, const T2& goalv, const T2& goala, double t) {
       if(t == 0.0) {
@@ -101,6 +98,7 @@ namespace cpp_filters {
     std::string& name() { return name_; };
     const std::string& name() const { return name_; };
 
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   protected:
     void getImpl(T1& x, T2& v, T2& a, double t);
     void resetImpl(const T1& x, const T2& v, const T2& a);
@@ -177,9 +175,9 @@ namespace cpp_filters {
     this->a0_ = x;
     this->a1_ = v;
     this->a2_ = a/2;
-    this->a3_ = x*0;
-    this->a4_ = x*0;
-    this->a5_ = x*0;
+    this->a3_ = v*0;
+    this->a4_ = v*0;
+    this->a5_ = v*0;
   }
   template<typename T1, typename T2>
   void TwoPointInterpolatorBase<T1,T2>::setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t) {

@@ -116,18 +116,19 @@ namespace  cpp_filters{
       double sum_ff_coeffs = std::accumulate(m_ff_coefficients.begin(), m_ff_coefficients.end(), 0.0);
       T reset_val = initial_input / sum_ff_coeffs;
       m_previous_values.assign(m_dimension, reset_val);
+      filtered = initial_input;
     }
 
     /**
        \brief passFilter
     */
-    double passFilter(const T& input) {
+    T passFilter(const T& input) {
       // IIRFilter implementation based on DirectForm-II.
       // Cf. https://en.wikipedia.org/wiki/Digital_filter
       if (! m_initialized) {
         return 0.0;
       }
-      T feedback, filtered;
+      T feedback;
       // calcurate retval
       feedback = m_fb_coefficients[0] * input;
       for (int i = 0; i < m_dimension; i++) {
@@ -144,11 +145,13 @@ namespace  cpp_filters{
       return filtered;
     }
 
+    const T& get() const { return filtered;}
   private:
     int m_dimension;
     std::vector<double> m_fb_coefficients; // fb parameters (dim must be m_dimension + 1, m_fb_coefficients[0] would be 1.0)
     std::vector<double> m_ff_coefficients; // ff parameters (dim must be m_dimension + 1)
     std::deque<T> m_previous_values;
+    T filtered;
 
     bool m_initialized;
     std::string m_error_prefix;
