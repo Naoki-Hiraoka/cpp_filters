@@ -126,7 +126,7 @@ namespace  cpp_filters{
       // IIRFilter implementation based on DirectForm-II.
       // Cf. https://en.wikipedia.org/wiki/Digital_filter
       if (! m_initialized) {
-        return 0.0;
+        return filtered*0.0;
       }
       T feedback;
       // calcurate retval
