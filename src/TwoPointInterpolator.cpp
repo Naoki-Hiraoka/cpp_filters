@@ -33,7 +33,8 @@ namespace cpp_filters {
         + (th-std::sin(th))/std::pow(th,3) * dtheta.cross(theta.cross(dtheta));
     }
 
-    if(th>0.0) x = this->startx_ * Eigen::AngleAxisd(th,theta.normalized());
+    // 単純に3x3行列の空間でRを積算していると、だんだん数値誤差によってユニタリ行列でなくなってしまう
+    if(th>0.0) x = Eigen::Matrix3d(Eigen::AngleAxisd(this->startx_) * Eigen::AngleAxisd(th,theta.normalized()));
     else x = this->startx_;
     v = Ainv * dtheta;
     a = Ainv * ddtheta + dAinv_dtheta;
