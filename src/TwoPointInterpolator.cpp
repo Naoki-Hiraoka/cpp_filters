@@ -19,14 +19,14 @@ namespace cpp_filters {
     Eigen::Matrix3d thetaX = hat(theta);
 
     Eigen::Matrix3d Ainv = Eigen::Matrix3d::Identity();
-    if(th>0.0){
+    if(th>1e-10){// 0除算がダメなのは勿論だが、小さすぎてもオーバーフローする恐れ
       Ainv =
         Eigen::Matrix3d::Identity()
         - (1-std::cos(th))/std::pow(th,2) * thetaX
         + (th - std::sin(th))/std::pow(th,3) * thetaX * thetaX;
     }
     Eigen::Vector3d dAinv_dtheta = Eigen::Vector3d::Zero();
-    if(th>0.0){
+    if(th>1e-10){// 0除算がダメなのは勿論だが、小さすぎてもオーバーフローする恐れ
       dAinv_dtheta =
         - (th*std::sin(th)+2*(std::cos(th)-1))/std::pow(th,4) * theta.dot(dtheta) * theta.cross(dtheta)
         - (2*th+th*std::cos(th)-3*std::sin(th))/std::pow(th,5) * theta.dot(dtheta) * theta.cross(theta.cross(dtheta))
@@ -34,7 +34,7 @@ namespace cpp_filters {
     }
 
     // 単純に3x3行列の空間でRを積算していると、だんだん数値誤差によってユニタリ行列でなくなってしまう
-    if(th>0.0) x = Eigen::Matrix3d(Eigen::AngleAxisd(this->startx_) * Eigen::AngleAxisd(th,theta.normalized()));
+    if(th>1e-10) x = Eigen::Matrix3d(Eigen::AngleAxisd(this->startx_) * Eigen::AngleAxisd(th,theta.normalized()));
     else x = this->startx_;
     v = Ainv * dtheta;
     a = Ainv * ddtheta + dAinv_dtheta;
@@ -60,7 +60,7 @@ namespace cpp_filters {
     Eigen::Matrix3d thetaX = hat(goaltheta);
     Eigen::Vector3d startdtheta = startv;
     Eigen::Matrix3d A = Eigen::Matrix3d::Identity();
-    if(th > 0.0){
+    if(th > 1e-10){ // 0除算がダメなのは勿論だが、小さすぎてもオーバーフローする恐れ
       A =
         Eigen::Matrix3d::Identity()
         + 0.5*thetaX
@@ -71,7 +71,7 @@ namespace cpp_filters {
     Eigen::Matrix3d dthetaX = hat(goaldtheta);
     Eigen::Vector3d startddtheta = starta;
     Eigen::Matrix3d dA = 0.5*thetaX;
-    if(th > 0.0){
+    if(th > 1e-10){ // 0除算がダメなのは勿論だが、小さすぎてもオーバーフローする恐れ
       dA =
         0.5*dthetaX
         + (dth*std::cos(th/2)/std::sin(th/2)/(2*std::pow(th,2)) + dth/(4*th*std::pow(std::sin(th/2),2)) - 2*dth/std::pow(th,3)) * thetaX * thetaX
