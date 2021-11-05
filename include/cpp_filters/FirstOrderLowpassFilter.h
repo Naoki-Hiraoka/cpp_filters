@@ -9,6 +9,9 @@ namespace  cpp_filters{
     T prev_value;
     double cutoff_freq, dt, const_param;
   public:
+    FirstOrderLowPassFilter (const double _cutoff_freq, const T init_value) : FirstOrderLowPassFilter(_cutoff_freq, 1.0, init_value)
+    {
+    };
     FirstOrderLowPassFilter (const double _cutoff_freq, const double _dt, const T init_value) : prev_value(init_value), dt(_dt)
     {
       setCutOffFreq(_cutoff_freq);
