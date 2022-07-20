@@ -26,30 +26,40 @@ namespace cpp_filters {
     {
       this->reset(init_x,init_v,init_a);
     }
-    // Getter function.
-    void get(T1& x, double dt=0.0) {
-      T2 v, a;
-      get(x, v, a, dt);
-    }
-    void get(T1& x, T2& v, double dt=0.0) {
-      T2 a;
-      get(x, v, a, dt);
-    }
-    void get(T1& x, T2& v, T2& a, double dt=0.0) {
+    void interpolate(double dt){
+      if(dt == 0.0 || current_time_ == goal_time_) return;
       current_time_ += dt;
       if (current_time_ < 0.0) current_time_ = 0.0;
       if (current_time_ > goal_time_) current_time_ = goal_time_;
-      double t = current_time_;
-      if(t == 0.0) {
-        x = startx_;
-        v = startv_;
-        a = starta_;
-        return;
-      }
-      this->getImpl(x,v,a,t);
-      if(t == goal_time_){
-        this->reset(x,v,a);
-      }
+      this->getImpl(currentx_,currentv_,currenta_,current_time_);
+    }
+    // Getter function.
+    T1 value() {
+      return currentx_;
+    }
+    void value(T1& x) {
+      x = currentx_;
+    }
+    void value(T1& x, T2& v) {
+      x = currentx_;
+      v = currentv_;
+    }
+    void value(T1& x, T2& v, T2& a) {
+      x = currentx_;
+      v = currentv_;
+      a = currenta_;
+    }
+    void get(T1& x, double dt=0.0) { // deprecated
+      T2 v, a;
+      get(x, v, a, dt);
+    }
+    void get(T1& x, T2& v, double dt=0.0) { // deprecated
+      T2 a;
+      get(x, v, a, dt);
+    }
+    void get(T1& x, T2& v, T2& a, double dt=0.0) { // deprecated
+      interpolate(dt);
+      value(x,v,a);
     }
     // Reset current value.
     void reset(const T1& x) {
@@ -65,7 +75,9 @@ namespace cpp_filters {
       this->startx_ = x;
       this->startv_ = v;
       this->starta_ = a;
-      this->resetImpl(x,v,a);
+      this->currentx_ = x;
+      this->currentv_ = v;
+      this->currenta_ = a;
     }
     // Stop to current value
     void clear() {
@@ -102,11 +114,8 @@ namespace cpp_filters {
       T1 x;
       T2 v, a;
       this->get(x,v,a,0.0);
-      this->current_time_ = 0.0;
+      this->reset(x,v,a);
       this->goal_time_ = t;
-      this->startx_ = x;
-      this->startv_ = v;
-      this->starta_ = a;
 
       this->setGoalImpl(x,v,a,goalx,goalv,goala,t);
     }
@@ -116,7 +125,6 @@ namespace cpp_filters {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   protected:
     void getImpl(T1& x, T2& v, T2& a, double t);
-    void resetImpl(const T1& x, const T2& v, const T2& a);
     void setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t);
     void calcCoeff(const T2& startx, const T2& startv, const T2& starta, const T2& goalx, const T2& goalv, const T2& goala, double t){
       T2 A,B,C;
@@ -175,6 +183,8 @@ namespace cpp_filters {
     T2 a0_, a1_, a2_, a3_, a4_, a5_;
     T1 startx_;
     T2 startv_, starta_;
+    T1 currentx_;
+    T2 currentv_, currenta_;
     // Interpolator name
     std::string name_;
   };
@@ -184,15 +194,6 @@ namespace cpp_filters {
   template<typename T1, typename T2>
   void TwoPointInterpolatorBase<T1,T2>::getImpl(T1& x, T2& v, T2& a, double t) {
     this->calcPolynomial(x,v,a,t);
-  }
-  template<typename T1, typename T2>
-  void TwoPointInterpolatorBase<T1,T2>::resetImpl(const T1& x, const T2& v, const T2& a) {
-    this->a0_ = x;
-    this->a1_ = v;
-    this->a2_ = a/2;
-    this->a3_ = v*0;
-    this->a4_ = v*0;
-    this->a5_ = v*0;
   }
   template<typename T1, typename T2>
   void TwoPointInterpolatorBase<T1,T2>::setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t) {
@@ -205,8 +206,6 @@ namespace cpp_filters {
   template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::getImpl(Eigen::Matrix3d& x, Eigen::Vector3d& v, Eigen::Vector3d& a, double t);
   template<>
-  void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::resetImpl(const Eigen::Matrix3d& x, const Eigen::Vector3d& v, const Eigen::Vector3d& a);
-  template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::setGoalImpl(const Eigen::Matrix3d& startx, const Eigen::Vector3d& startv, const Eigen::Vector3d& starta, const Eigen::Matrix3d& goalx, const Eigen::Vector3d& goalv, const Eigen::Vector3d& goala, double t);
   using TwoPointInterpolatorSO3 = TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>;
 
@@ -217,29 +216,39 @@ namespace cpp_filters {
     TwoPointInterpolatorSE3(const Position& init_x, const Eigen::Matrix<double, 6, 1>& init_v, const Eigen::Matrix<double, 6, 1>& init_a, interpolation_mode imode=HOFFARBIB) :
       p(init_x.translation(),init_v.head<3>(), init_a.head<3>(), imode),
       R(init_x.linear(),init_v.tail<3>(), init_a.tail<3>(), imode) {}
-    void get(Position& x, double dt=0.0) {
+    void interpolate(double dt){
+      p.interpolate(dt);
+      R.interpolate(dt);
+    }
+    Position value() {
+      Position ret;
+      ret.translation() = p.value();
+      ret.linear() = R.value();
+      return ret;
+    }
+    void value(Position& x) {
       Eigen::Vector3d p_x;
       Eigen::Matrix3d R_x;
-      p.get(p_x,dt);
-      R.get(R_x,dt);
+      p.value(p_x);
+      R.value(R_x);
       x.translation() = p_x;
       x.linear() = R_x;
     }
-    void get(Position& x, Eigen::Matrix<double, 6, 1>& v, double dt=0.0) {
+    void value(Position& x, Eigen::Matrix<double, 6, 1>& v) {
       Eigen::Vector3d p_x, p_v, R_v;
       Eigen::Matrix3d R_x;
-      p.get(p_x,p_v,dt);
-      R.get(R_x,R_v,dt);
+      p.value(p_x,p_v);
+      R.value(R_x,R_v);
       x.translation() = p_x;
       v.head<3>() = p_v;
       x.linear() = R_x;
       v.tail<3>() = R_v;
     }
-    void get(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a, double dt=0.0) {
+    void value(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) {
       Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
       Eigen::Matrix3d R_x;
-      p.get(p_x,p_v,p_a,dt);
-      R.get(R_x,R_v,R_a,dt);
+      p.value(p_x,p_v,p_a);
+      R.value(R_x,R_v,R_a);
       x.translation() = p_x;
       v.head<3>() = p_v;
       a.head<3>() = p_a;

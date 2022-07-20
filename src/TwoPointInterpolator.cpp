@@ -40,15 +40,6 @@ namespace cpp_filters {
     a = Ainv * ddtheta + dAinv_dtheta;
   }
   template<>
-  void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::resetImpl(const Eigen::Matrix3d& x, const Eigen::Vector3d& v, const Eigen::Vector3d& a) {
-    this->a0_ = Eigen::Vector3d::Zero();
-    this->a1_ = v;
-    this->a2_ = a/2;
-    this->a3_ = Eigen::Vector3d::Zero();
-    this->a4_ = Eigen::Vector3d::Zero();
-    this->a5_ = Eigen::Vector3d::Zero();
-  }
-  template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::setGoalImpl(const Eigen::Matrix3d& startx, const Eigen::Vector3d& startv, const Eigen::Vector3d& starta, const Eigen::Matrix3d& goalx, const Eigen::Vector3d& goalv, const Eigen::Vector3d& goala, double t) {
 
     Eigen::Vector3d starttheta = Eigen::Vector3d::Zero();
