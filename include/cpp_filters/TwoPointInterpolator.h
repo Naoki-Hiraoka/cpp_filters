@@ -34,17 +34,17 @@ namespace cpp_filters {
       this->getImpl(currentx_,currentv_,currenta_,current_time_);
     }
     // Getter function.
-    T1 value() {
+    T1 value() const {
       return currentx_;
     }
-    void value(T1& x) {
+    void value(T1& x) const {
       x = currentx_;
     }
-    void value(T1& x, T2& v) {
+    void value(T1& x, T2& v) const {
       x = currentx_;
       v = currentv_;
     }
-    void value(T1& x, T2& v, T2& a) {
+    void value(T1& x, T2& v, T2& a) const {
       x = currentx_;
       v = currentv_;
       a = currenta_;
@@ -86,10 +86,10 @@ namespace cpp_filters {
       this->get(x,v,a,0.0);
       this->reset(x,v*0,a*0);
     }
-    bool isEmpty() {
+    bool isEmpty() const {
       return current_time_ == goal_time_;
     }
-    double remain_time() {
+    double remain_time() const {
       return goal_time_ - current_time_;
     }
     bool setInterpolationMode (interpolation_mode i_mode){
@@ -220,13 +220,13 @@ namespace cpp_filters {
       p.interpolate(dt);
       R.interpolate(dt);
     }
-    Position value() {
+    Position value() const {
       Position ret;
       ret.translation() = p.value();
       ret.linear() = R.value();
       return ret;
     }
-    void value(Position& x) {
+    void value(Position& x) const {
       Eigen::Vector3d p_x;
       Eigen::Matrix3d R_x;
       p.value(p_x);
@@ -234,7 +234,7 @@ namespace cpp_filters {
       x.translation() = p_x;
       x.linear() = R_x;
     }
-    void value(Position& x, Eigen::Matrix<double, 6, 1>& v) {
+    void value(Position& x, Eigen::Matrix<double, 6, 1>& v) const {
       Eigen::Vector3d p_x, p_v, R_v;
       Eigen::Matrix3d R_x;
       p.value(p_x,p_v);
@@ -244,7 +244,7 @@ namespace cpp_filters {
       x.linear() = R_x;
       v.tail<3>() = R_v;
     }
-    void value(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) {
+    void value(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) const {
       Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
       Eigen::Matrix3d R_x;
       p.value(p_x,p_v,p_a);
@@ -273,10 +273,10 @@ namespace cpp_filters {
       p.clear();
       R.clear();
     }
-    bool isEmpty() {
+    bool isEmpty() const {
       return p.isEmpty();
     }
-    double remain_time() {
+    double remain_time() const {
       return p.remain_time();
     }
     bool setInterpolationMode (interpolation_mode i_mode){
