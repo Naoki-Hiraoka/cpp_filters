@@ -196,6 +196,87 @@ namespace cpp_filters {
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::setGoalImpl(const Eigen::Matrix3d& startx, const Eigen::Vector3d& startv, const Eigen::Vector3d& starta, const Eigen::Matrix3d& goalx, const Eigen::Vector3d& goalv, const Eigen::Vector3d& goala, double t);
   using TwoPointInterpolatorSO3 = TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>;
 
+  // for Eigen::Transform<double, 3, Eigen::AffineCompact>
+  class TwoPointInterpolatorSE3 {
+    using Position = Eigen::Transform<double, 3, Eigen::AffineCompact>;
+  public:
+    TwoPointInterpolatorSE3(const Position& init_x, const Eigen::Matrix<double, 6, 1>& init_v, const Eigen::Matrix<double, 6, 1>& init_a, interpolation_mode imode=HOFFARBIB) :
+      p(init_x.translation(),init_v.head<3>(), init_a.head<3>(), imode),
+      R(init_x.linear(),init_v.tail<3>(), init_a.tail<3>(), imode) {}
+    void get(Position& x, double dt=0.0) {
+      Eigen::Vector3d p_x;
+      Eigen::Matrix3d R_x;
+      p.get(p_x,dt);
+      R.get(R_x,dt);
+      x.translation() = p_x;
+      x.linear() = R_x;
+    }
+    void get(Position& x, Eigen::Matrix<double, 6, 1>& v, double dt=0.0) {
+      Eigen::Vector3d p_x, p_v, R_v;
+      Eigen::Matrix3d R_x;
+      p.get(p_x,p_v,dt);
+      R.get(R_x,R_v,dt);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+    }
+    void get(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a, double dt=0.0) {
+      Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
+      Eigen::Matrix3d R_x;
+      p.get(p_x,p_v,p_a,dt);
+      R.get(R_x,R_v,R_a,dt);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      a.head<3>() = p_a;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+      a.tail<3>() = R_a;
+    }
+    // Reset current value.
+    void reset(const Position& x) {
+      p.reset(x.translation());
+      R.reset(x.linear());
+    }
+    void reset(const Position& x, const Eigen::Matrix<double, 6, 1>& v) {
+      p.reset(x.translation(),v.head<3>());
+      R.reset(x.linear(),v.tail<3>());
+    }
+    void reset(const Position& x, const Eigen::Matrix<double, 6, 1>& v, const Eigen::Matrix<double, 6, 1>& a) {
+      p.reset(x.translation(),v.head<3>(),a.head<3>());
+      R.reset(x.linear(),v.tail<3>(),a.tail<3>());
+    }
+    void clear() {
+      p.clear();
+      R.clear();
+    }
+    bool isEmpty() {
+      return p.isEmpty();
+    }
+    double remain_time() {
+      return p.remain_time();
+    }
+    bool setInterpolationMode (interpolation_mode i_mode){
+      return p.setInterpolationMode(i_mode) && R.setInterpolationMode(i_mode);
+    };
+    void setGoal(const Position& goalx, double t) {
+      p.setGoal(goalx.translation(),t);
+      R.setGoal(goalx.linear(),t);
+    }
+    void setGoal(const Position& goalx, const Eigen::Matrix<double, 6, 1>& goalv, double t) {
+      p.setGoal(goalx.translation(),goalv.head<3>(),t);
+      R.setGoal(goalx.linear(),goalv.tail<3>(),t);
+    }
+    void setGoal(const Position& goalx, const Eigen::Matrix<double, 6, 1>& goalv, const Eigen::Matrix<double, 6, 1>& goala, double t) {
+      p.setGoal(goalx.translation(),goalv.head<3>(),goala.head<3>(),t);
+      R.setGoal(goalx.linear(),goalv.tail<3>(),goala.tail<3>(),t);
+    }
+    std::string& name() { return p.name(); };
+    const std::string& name() const { return p.name(); };
+  protected:
+    TwoPointInterpolator<Eigen::Vector3d> p;
+    TwoPointInterpolatorSO3 R;
+  };
 }
 
 #endif
