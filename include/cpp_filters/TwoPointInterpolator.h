@@ -78,6 +78,9 @@ namespace cpp_filters {
       this->currentx_ = x;
       this->currentv_ = v;
       this->currenta_ = a;
+      this->goalx_ = x;
+      this->goalv_ = v;
+      this->goala_ = a;
     }
     // Stop to current value
     void clear() {
@@ -116,8 +119,26 @@ namespace cpp_filters {
       this->get(x,v,a,0.0);
       this->reset(x,v,a);
       this->goal_time_ = t;
+      this->goalx_ = goalx;
+      this->goalv_ = goalv;
+      this->goala_ = goala;
 
       this->setGoalImpl(x,v,a,goalx,goalv,goala,t);
+    }
+    T1 getGoal() const {
+      return goalx_;
+    }
+    void getGoal(T1& x) const {
+      x = goalx_;
+    }
+    void getGoal(T1& x, T2& v) const {
+      x = goalx_;
+      v = goalv_;
+    }
+    void getGoal(T1& x, T2& v, T2& a) const {
+      x = goalx_;
+      v = goalv_;
+      a = goala_;
     }
     std::string& name() { return name_; };
     const std::string& name() const { return name_; };
@@ -185,6 +206,8 @@ namespace cpp_filters {
     T2 startv_, starta_;
     T1 currentx_;
     T2 currentv_, currenta_;
+    T1 goalx_;
+    T2 goalv_, goala_;
     // Interpolator name
     std::string name_;
   };
@@ -293,6 +316,42 @@ namespace cpp_filters {
     void setGoal(const Position& goalx, const Eigen::Matrix<double, 6, 1>& goalv, const Eigen::Matrix<double, 6, 1>& goala, double t) {
       p.setGoal(goalx.translation(),goalv.head<3>(),goala.head<3>(),t);
       R.setGoal(goalx.linear(),goalv.tail<3>(),goala.tail<3>(),t);
+    }
+    Position getGoal() const {
+      Position ret;
+      ret.translation() = p.getGoal();
+      ret.linear() = R.getGoal();
+      return ret;
+    }
+    void getGoal(Position& x) const {
+      Eigen::Vector3d p_x;
+      Eigen::Matrix3d R_x;
+      p.getGoal(p_x);
+      R.getGoal(R_x);
+      x.translation() = p_x;
+      x.linear() = R_x;
+    }
+    void getGoal(Position& x, Eigen::Matrix<double, 6, 1>& v) const {
+      Eigen::Vector3d p_x, p_v, R_v;
+      Eigen::Matrix3d R_x;
+      p.getGoal(p_x,p_v);
+      R.getGoal(R_x,R_v);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+    }
+    void getGoal(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) const {
+      Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
+      Eigen::Matrix3d R_x;
+      p.getGoal(p_x,p_v,p_a);
+      R.getGoal(R_x,R_v,R_a);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      a.head<3>() = p_a;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+      a.tail<3>() = R_a;
     }
     std::string& name() { return p.name(); };
     const std::string& name() const { return p.name(); };
