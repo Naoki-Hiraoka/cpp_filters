@@ -40,7 +40,16 @@ namespace cpp_filters {
       if (current_time_ < 0.0) current_time_ = 0.0;
       if (current_time_ > goal_time_) current_time_ = goal_time_;
       double t = current_time_;
+      if(t == 0.0) {
+        x = startx_;
+        v = startv_;
+        a = starta_;
+        return;
+      }
       this->getImpl(x,v,a,t);
+      if(t == goal_time_){
+        this->reset(x,v,a);
+      }
     }
     // Reset current value.
     void reset(const T1& x) {
@@ -51,8 +60,11 @@ namespace cpp_filters {
     }
     void reset(const T1& x, const T2& v, const T2& a)
     {
-      goal_time_ = 0.0;
-      current_time_ = 0.0;
+      this->goal_time_ = 0.0;
+      this->current_time_ = 0.0;
+      this->startx_ = x;
+      this->startv_ = v;
+      this->starta_ = a;
       this->resetImpl(x,v,a);
     }
     // Stop to current value
@@ -92,6 +104,9 @@ namespace cpp_filters {
       this->get(x,v,a,0.0);
       this->current_time_ = 0.0;
       this->goal_time_ = t;
+      this->startx_ = x;
+      this->startv_ = v;
+      this->starta_ = a;
 
       this->setGoalImpl(x,v,a,goalx,goalv,goala,t);
     }
@@ -159,6 +174,7 @@ namespace cpp_filters {
     // Coefficients for interpolation polynomials.
     T2 a0_, a1_, a2_, a3_, a4_, a5_;
     T1 startx_;
+    T2 startv_, starta_;
     // Interpolator name
     std::string name_;
   };
@@ -171,7 +187,6 @@ namespace cpp_filters {
   }
   template<typename T1, typename T2>
   void TwoPointInterpolatorBase<T1,T2>::resetImpl(const T1& x, const T2& v, const T2& a) {
-    this->startx_ = x;
     this->a0_ = x;
     this->a1_ = v;
     this->a2_ = a/2;
@@ -181,7 +196,6 @@ namespace cpp_filters {
   }
   template<typename T1, typename T2>
   void TwoPointInterpolatorBase<T1,T2>::setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t) {
-    this->startx_ = startx;
     this->calcCoeff(startx, startv, starta, goalx, goalv, goala, t);
   }
   template<typename T> using TwoPointInterpolator = TwoPointInterpolatorBase<T,T>;
