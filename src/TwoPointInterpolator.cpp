@@ -33,17 +33,17 @@ namespace cpp_filters {
         + (th-std::sin(th))/std::pow(th,3) * dtheta.cross(theta.cross(dtheta));
     }
 
-    // 単純に3x3行列の空間でRを積算していると、だんだん数値誤差によってユニタリ行列でなくなってしまう
+    // 単純に3x3行列の空間でRを積算していると、だんだん数値誤差によって回転行列でなくなってしまう
     if(th>1e-10) x = Eigen::Matrix3d(Eigen::AngleAxisd(this->startx_) * Eigen::AngleAxisd(th,theta.normalized()));
     else x = this->startx_;
     v = Ainv * dtheta;
     a = Ainv * ddtheta + dAinv_dtheta;
   }
+
   template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::setGoalImpl(const Eigen::Matrix3d& startx, const Eigen::Vector3d& startv, const Eigen::Vector3d& starta, const Eigen::Matrix3d& goalx, const Eigen::Vector3d& goalv, const Eigen::Vector3d& goala, double t) {
-
     Eigen::Vector3d starttheta = Eigen::Vector3d::Zero();
-    Eigen::AngleAxisd angleaxis(startx.transpose()*goalx);
+    Eigen::AngleAxisd angleaxis(startx.transpose()*Eigen::AngleAxisd(goalx)); // 単純に3x3行列の空間でRを積算していると、だんだん数値誤差によって回転行列でなくなってしまう
     Eigen::Vector3d goaltheta = angleaxis.angle() * angleaxis.axis();
     double th = goaltheta.norm();
     Eigen::Matrix3d thetaX = hat(goaltheta);

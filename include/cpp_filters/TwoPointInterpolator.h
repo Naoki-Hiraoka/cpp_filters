@@ -81,6 +81,7 @@ namespace cpp_filters {
       this->goalx_ = x;
       this->goalv_ = v;
       this->goala_ = a;
+      this->resetImpl(x,v,a);
     }
     // Stop to current value
     void clear() {
@@ -119,11 +120,9 @@ namespace cpp_filters {
       this->get(x,v,a,0.0);
       this->reset(x,v,a);
       this->goal_time_ = t;
-      this->goalx_ = goalx;
-      this->goalv_ = goalv;
-      this->goala_ = goala;
 
       this->setGoalImpl(x,v,a,goalx,goalv,goala,t);
+      this->getImpl(this->goalx_, this->goalv_, this->goala_, this->goal_time_); // this->goalx_ = goalxとしないのは、数値誤差によって補間計算結果とgoalxが必ずしも一致しないため. t=goal_time_ - epsのときは補間計算を行うが、t=goal_time_のときはthis->goalx_をそのまま返す仕様にしているので, 値が不連続に変化してしまう.
     }
     T1 getGoal() const {
       return goalx_;
@@ -146,6 +145,7 @@ namespace cpp_filters {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   protected:
     void getImpl(T1& x, T2& v, T2& a, double t);
+    void resetImpl(const T1& x, const T2& v, const T2& a){}
     void setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t);
     void calcCoeff(const T2& startx, const T2& startv, const T2& starta, const T2& goalx, const T2& goalv, const T2& goala, double t){
       T2 A,B,C;
