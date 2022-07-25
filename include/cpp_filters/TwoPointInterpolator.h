@@ -120,9 +120,11 @@ namespace cpp_filters {
       this->get(x,v,a,0.0);
       this->reset(x,v,a);
       this->goal_time_ = t;
+      this->goalx_ = goalx;
+      this->goalv_ = goalv;
+      this->goala_ = goala;
 
       this->setGoalImpl(x,v,a,goalx,goalv,goala,t);
-      this->getImpl(this->goalx_, this->goalv_, this->goala_, this->goal_time_); // this->goalx_ = goalxとしないのは、数値誤差によって補間計算結果とgoalxが必ずしも一致しないため. t=goal_time_ - epsのときは補間計算を行うが、t=goal_time_のときはthis->goalx_をそのまま返す仕様にしているので, 値が不連続に変化してしまう.
     }
     T1 getGoal() const {
       return goalx_;
@@ -134,7 +136,7 @@ namespace cpp_filters {
       x = goalx_;
       v = goalv_;
     }
-    void getGoal(T1& x, T2& v, T2& a) const {
+    void getGoal(T1& x, T2& v, T2& a) const { // current_time = goal_time時のvalue()値と、getGoal()値は、数値誤差によって僅かに異なることに注意
       x = goalx_;
       v = goalv_;
       a = goala_;
