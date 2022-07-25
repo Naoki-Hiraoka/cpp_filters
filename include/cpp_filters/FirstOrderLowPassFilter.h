@@ -37,7 +37,8 @@ namespace  cpp_filters{
       const_param = 2 * M_PI * cutoff_freq * dt;
     };
     double getCutOffFreq () const { return cutoff_freq; };
-    T getCurrentValue () const { return prev_value; };
+    T getCurrentValue () const { return prev_value; }; // deprecated
+    T value () const { return prev_value; };
   };
 
 };
