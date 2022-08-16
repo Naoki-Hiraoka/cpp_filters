@@ -96,6 +96,12 @@ namespace cpp_filters {
     double remain_time() const {
       return goal_time_ - current_time_;
     }
+    double current_time() const {
+      return current_time_;
+    }
+    double goal_time() const{
+      return goal_time_;
+    }
     bool setInterpolationMode (interpolation_mode i_mode){
       if (i_mode != LINEAR && i_mode != HOFFARBIB &&
           i_mode != QUINTICSPLINE && i_mode != CUBICSPLINE) return false;
