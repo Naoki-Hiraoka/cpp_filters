@@ -81,6 +81,12 @@ namespace cpp_filters {
       this->goalx_ = x;
       this->goalv_ = v;
       this->goala_ = a;
+      this->a0_= v * 0.0;
+      this->a1_= v * 0.0;
+      this->a2_= v * 0.0;
+      this->a3_= v * 0.0;
+      this->a4_= v * 0.0;
+      this->a5_= v * 0.0;
       this->resetImpl(x,v,a);
     }
     // Stop to current value
