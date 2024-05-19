@@ -248,7 +248,9 @@ namespace cpp_filters {
 
   // for Eigen::Transform<double, 3, Eigen::AffineCompact>
   class TwoPointInterpolatorSE3 {
+    // Eigen::Isometry3dはEigen::Transform<double, 3, Eigen::AffineCompact>の子クラスである. 引数はEigen::Transform<double, 3, Eigen::AffineCompact>, 返り値はIsometry3dにして、緩くする.
     using Position = Eigen::Transform<double, 3, Eigen::AffineCompact>;
+    using Isometry3 = Eigen::Isometry3d;
   public:
     TwoPointInterpolatorSE3(const Position& init_x, const Eigen::Matrix<double, 6, 1>& init_v, const Eigen::Matrix<double, 6, 1>& init_a, interpolation_mode imode=HOFFARBIB) :
       p(init_x.translation(),init_v.head<3>(), init_a.head<3>(), imode),
@@ -257,8 +259,8 @@ namespace cpp_filters {
       p.interpolate(dt);
       R.interpolate(dt);
     }
-    Position value() const {
-      Position ret;
+    Isometry3 value() const {
+      Isometry3 ret;
       ret.translation() = p.value();
       ret.linear() = R.value();
       return ret;
@@ -331,8 +333,8 @@ namespace cpp_filters {
       p.setGoal(goalx.translation(),goalv.head<3>(),goala.head<3>(),t);
       R.setGoal(goalx.linear(),goalv.tail<3>(),goala.tail<3>(),t);
     }
-    Position getGoal() const {
-      Position ret;
+    Isometry3 getGoal() const {
+      Isometry3 ret;
       ret.translation() = p.getGoal();
       ret.linear() = R.getGoal();
       return ret;
