@@ -273,6 +273,14 @@ namespace cpp_filters {
       x.translation() = p_x;
       x.linear() = R_x;
     }
+    void value(Isometry3& x) const {
+      Eigen::Vector3d p_x;
+      Eigen::Matrix3d R_x;
+      p.value(p_x);
+      R.value(R_x);
+      x.translation() = p_x;
+      x.linear() = R_x;
+    }
     void value(Position& x, Eigen::Matrix<double, 6, 1>& v) const {
       Eigen::Vector3d p_x, p_v, R_v;
       Eigen::Matrix3d R_x;
@@ -283,7 +291,29 @@ namespace cpp_filters {
       x.linear() = R_x;
       v.tail<3>() = R_v;
     }
+    void value(Isometry3& x, Eigen::Matrix<double, 6, 1>& v) const {
+      Eigen::Vector3d p_x, p_v, R_v;
+      Eigen::Matrix3d R_x;
+      p.value(p_x,p_v);
+      R.value(R_x,R_v);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+    }
     void value(Position& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) const {
+      Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
+      Eigen::Matrix3d R_x;
+      p.value(p_x,p_v,p_a);
+      R.value(R_x,R_v,R_a);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      a.head<3>() = p_a;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+      a.tail<3>() = R_a;
+    }
+    void value(Isometry3& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) const {
       Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
       Eigen::Matrix3d R_x;
       p.value(p_x,p_v,p_a);
