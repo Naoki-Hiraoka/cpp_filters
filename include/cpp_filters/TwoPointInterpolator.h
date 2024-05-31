@@ -239,7 +239,7 @@ namespace cpp_filters {
   template<typename T> using TwoPointInterpolator = TwoPointInterpolatorBase<T,T>;
 
 
-  // for SO3. v and a are represented in local frame.
+  // for SO3. v and a are represented in world frame, local origin.
   template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::getImpl(Eigen::Matrix3d& x, Eigen::Vector3d& v, Eigen::Vector3d& a, double t);
   template<>

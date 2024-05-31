@@ -36,8 +36,8 @@ namespace cpp_filters {
     // 単純に3x3行列の空間でRを積算していると、だんだん数値誤差によって回転行列でなくなってしまう
     if(th>1e-10) x = Eigen::Matrix3d(Eigen::AngleAxisd(this->startx_) * Eigen::AngleAxisd(th,theta.normalized()));
     else x = this->startx_;
-    v = Ainv * dtheta;
-    a = Ainv * ddtheta + dAinv_dtheta;
+    v = x * (Ainv * dtheta);
+    a = x * (Ainv * ddtheta + dAinv_dtheta);
   }
 
   template<>
@@ -47,7 +47,7 @@ namespace cpp_filters {
     Eigen::Vector3d goaltheta = angleaxis.angle() * angleaxis.axis();
     double th = goaltheta.norm();
     Eigen::Matrix3d thetaX = hat(goaltheta);
-    Eigen::Vector3d startdtheta = startv;
+    Eigen::Vector3d startdtheta = startx.transpose() * startv;
     Eigen::Matrix3d A = Eigen::Matrix3d::Identity();
     if(th > 1e-10){ // 0除算がダメなのは勿論だが、小さすぎてもオーバーフローする恐れ
       A =
@@ -55,10 +55,10 @@ namespace cpp_filters {
         + 0.5*thetaX
         + (1-th/2*std::cos(th/2)/std::sin(th/2))/std::pow(th,2) * thetaX * thetaX;
     }
-    Eigen::Vector3d goaldtheta = A*goalv;
+    Eigen::Vector3d goaldtheta = A*(goalx.transpose() * goalv);
     double dth = goaldtheta.norm();
     Eigen::Matrix3d dthetaX = hat(goaldtheta);
-    Eigen::Vector3d startddtheta = starta;
+    Eigen::Vector3d startddtheta = startx.transpose() * starta;
     Eigen::Matrix3d dA = 0.5*thetaX;
     if(th > 1e-10){ // 0除算がダメなのは勿論だが、小さすぎてもオーバーフローする恐れ
       dA =
@@ -66,7 +66,7 @@ namespace cpp_filters {
         + (dth*std::cos(th/2)/std::sin(th/2)/(2*std::pow(th,2)) + dth/(4*th*std::pow(std::sin(th/2),2)) - 2*dth/std::pow(th,3)) * thetaX * thetaX
         + (1-th/2*std::cos(th/2)/std::sin(th/2))/std::pow(th,2) * (dthetaX*thetaX + thetaX*dthetaX);
     }
-    Eigen::Vector3d goalddtheta = dA * goalv + A * goala;
+    Eigen::Vector3d goalddtheta = dA * (goalx.transpose() * goalv) + A * (goalx.transpose() * goala);
 
     this->calcCoeff(starttheta, startdtheta, startddtheta, goaltheta, goaldtheta, goalddtheta, t);
   }
