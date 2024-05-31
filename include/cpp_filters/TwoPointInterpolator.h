@@ -122,7 +122,7 @@ namespace cpp_filters {
       this->setGoal(goalx,goalv,this->a0_*0,t);
     }
     void setGoal(const T1& goalx, const T2& goalv, const T2& goala, double t) {
-      if(t == 0.0) {
+      if(t <= 0.0) {
         this->reset(goalx,goalv,goala);
         return;
       }
