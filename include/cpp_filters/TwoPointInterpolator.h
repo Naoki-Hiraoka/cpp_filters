@@ -49,6 +49,26 @@ namespace cpp_filters {
       v = currentv_;
       a = currenta_;
     }
+    // Getter function. This function computes value for each time.
+    T1 futureValue(double time) const {
+      T1 x;
+      T2 v, a;
+      futureValue(time,x,v,a);
+      return x;
+    }
+    void futureValue(double time, T1& x) const {
+      T2 v, a;
+      futureValue(time,x,v,a);
+    }
+    void futureValue(double time, T1& x, T2& v) const {
+      T2 a;
+      futureValue(time,x,v,a);
+    }
+    void futureValue(double time, T1& x, T2& v, T2& a) const {
+      double future_time = current_time_ + time;
+      if(future_time > goal_time_) future_time = goal_time_;
+      this->getImpl(x,v,a,future_time);
+    }
     void get(T1& x, double dt=0.0) { // deprecated
       T2 v, a;
       get(x, v, a, dt);
@@ -158,7 +178,7 @@ namespace cpp_filters {
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   protected:
-    void getImpl(T1& x, T2& v, T2& a, double t);
+    void getImpl(T1& x, T2& v, T2& a, double t) const;
     void resetImpl(const T1& x, const T2& v, const T2& a){}
     void setGoalImpl(const T1& startx, const T2& startv, const T2& starta, const T1& goalx, const T2& goalv, const T2& goala, double t);
     void calcCoeff(const T2& startx, const T2& startv, const T2& starta, const T2& goalx, const T2& goalv, const T2& goala, double t){
@@ -205,7 +225,7 @@ namespace cpp_filters {
         break;
       }
     }
-    void calcPolynomial(T2& x, T2& v, T2& a, double t){
+    void calcPolynomial(T2& x, T2& v, T2& a, double t) const{
       x=a0_+a1_*t+a2_*t*t+a3_*t*t*t+a4_*t*t*t*t+a5_*t*t*t*t*t;
       v=a1_+2*a2_*t+3*a3_*t*t+4*a4_*t*t*t+5*a5_*t*t*t*t;
       a=2*a2_+6*a3_*t+12*a4_*t*t+20*a5_*t*t*t;
@@ -229,7 +249,7 @@ namespace cpp_filters {
 
   // for Euclid
   template<typename T1, typename T2>
-  void TwoPointInterpolatorBase<T1,T2>::getImpl(T1& x, T2& v, T2& a, double t) {
+  void TwoPointInterpolatorBase<T1,T2>::getImpl(T1& x, T2& v, T2& a, double t) const{
     this->calcPolynomial(x,v,a,t);
   }
   template<typename T1, typename T2>
@@ -241,7 +261,7 @@ namespace cpp_filters {
 
   // for SO3. v and a are represented in world frame, local origin.
   template<>
-  void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::getImpl(Eigen::Matrix3d& x, Eigen::Vector3d& v, Eigen::Vector3d& a, double t);
+  void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::getImpl(Eigen::Matrix3d& x, Eigen::Vector3d& v, Eigen::Vector3d& a, double t) const;
   template<>
   void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::setGoalImpl(const Eigen::Matrix3d& startx, const Eigen::Vector3d& startv, const Eigen::Vector3d& starta, const Eigen::Matrix3d& goalx, const Eigen::Vector3d& goalv, const Eigen::Vector3d& goala, double t);
   using TwoPointInterpolatorSO3 = TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>;
@@ -318,6 +338,42 @@ namespace cpp_filters {
       Eigen::Matrix3d R_x;
       p.value(p_x,p_v,p_a);
       R.value(R_x,R_v,R_a);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      a.head<3>() = p_a;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+      a.tail<3>() = R_a;
+    }
+    Isometry3 futureValue(double time) const {
+      Isometry3 ret;
+      ret.translation() = p.futureValue(time);
+      ret.linear() = R.futureValue(time);
+      return ret;
+    }
+    void futureValue(double time, Isometry3& x) const {
+      Eigen::Vector3d p_x;
+      Eigen::Matrix3d R_x;
+      p.futureValue(time,p_x);
+      R.futureValue(time,R_x);
+      x.translation() = p_x;
+      x.linear() = R_x;
+    }
+    void futureValue(double time, Isometry3& x, Eigen::Matrix<double, 6, 1>& v) const {
+      Eigen::Vector3d p_x, p_v, R_v;
+      Eigen::Matrix3d R_x;
+      p.futureValue(time,p_x,p_v);
+      R.futureValue(time,R_x,R_v);
+      x.translation() = p_x;
+      v.head<3>() = p_v;
+      x.linear() = R_x;
+      v.tail<3>() = R_v;
+    }
+    void futureValue(double time, Isometry3& x, Eigen::Matrix<double, 6, 1>& v, Eigen::Matrix<double, 6, 1>& a) const {
+      Eigen::Vector3d p_x, p_v, p_a, R_v, R_a;
+      Eigen::Matrix3d R_x;
+      p.futureValue(time,p_x,p_v,p_a);
+      R.futureValue(time,R_x,R_v,R_a);
       x.translation() = p_x;
       v.head<3>() = p_v;
       a.head<3>() = p_a;

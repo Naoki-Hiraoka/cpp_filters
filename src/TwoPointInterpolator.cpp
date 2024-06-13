@@ -12,7 +12,7 @@ namespace cpp_filters {
   // Smooth Attitude Interpolation
   // https://github.com/scipy/scipy/files/2932755/attitude_interpolation.pdf
   template<>
-  void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::getImpl(Eigen::Matrix3d& x, Eigen::Vector3d& v, Eigen::Vector3d& a, double t) {
+  void TwoPointInterpolatorBase<Eigen::Matrix3d,Eigen::Vector3d>::getImpl(Eigen::Matrix3d& x, Eigen::Vector3d& v, Eigen::Vector3d& a, double t) const{
     Eigen::Vector3d theta, dtheta, ddtheta;
     this->calcPolynomial(theta,dtheta,ddtheta,t);
     double th = theta.norm();
